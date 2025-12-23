@@ -7,14 +7,12 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
-# Ensure src is in path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from src.simulation import AdExNetwork
 from src.statistics import NetworkStatistics
 import src.config as config
 import src.theory as theory
 
-# Settings
 plt.rcParams.update({'font.size': 12, 'font.family': 'sans-serif', 'lines.linewidth': 2, 'figure.dpi': 150})
 STATS_REPORT_FILE = "paper_statistics_report.txt"
 
@@ -23,7 +21,6 @@ def log_stat(msg):
     with open(STATS_REPORT_FILE, "a") as f:
         f.write(msg + "\n")
 
-# --- PHASE 1: THEORY VALIDATION ---
 def phase_1_theory_validation():
     log_stat("\n=== PHASE 1: THEORY VALIDATION ===")
     
@@ -73,23 +70,15 @@ def phase_1_theory_validation():
     plt.savefig("fig1_validation_robust.png")
     log_stat("Generated fig1_validation_robust.png")
     
-    # Return interpolator (Linear is safer for wide range)
     return interp1d(I_vals, mean_rates, kind='linear', fill_value='extrapolate')
 
-# --- PHASE 2: BIFURCATION ---
 def phase_2_bifurcation(f_I_func):
     log_stat("\n=== PHASE 2: BIFURCATION & STABILITY ===")
     
-    # 1. Theory alignment
-    # 1. Theory alignment
-    # User specifies J=50 matches simulation W=50.
-    # We interpret J as Synaptic Weight (pA).
-    # Mean Field Coupling (pA/Hz) = Weight * tau_syn * 1e-3
-    # Note: We include a factor of 2.0 to account for dense network interaction/noise gain.
+    
     tau_syn = 5.0
     conversion_factor = tau_syn * 1e-3 * 2.0
     
-    # 2. Sweep J (Weight pA)
     J_vals = np.linspace(0, 80, 200) # Scan Weights
     
     # Check fixed points at specific J=50 (Simulation Match)
@@ -170,10 +159,7 @@ def phase_2_bifurcation(f_I_func):
             elif r < 20: stable_low.append((w_val, r)) 
             else: stable_high.append((w_val, r))
             
-    # Plot Bifurcation
-    # fig2_bifurcation.png
     
-    # Unzip
     sl_x, sl_y = zip(*stable_low) if stable_low else ([],[])
     uh_x, uh_y = zip(*unstable) if unstable else ([],[])
     sh_x, sh_y = zip(*stable_high) if stable_high else ([],[])
@@ -379,7 +365,6 @@ def phase_4_structural_stats():
     except FileNotFoundError:
         log_stat("Error: Data not found.")
 
-# --- PHASE 5: CLOCK MODE ---
 def phase_5_clock_mode():
     log_stat("\n=== PHASE 5: CLOCK MODE (High Adaptation) ===")
     
@@ -432,7 +417,6 @@ def phase_5_clock_mode():
     plt.savefig("fig5_clock_mode.png")
     log_stat("Generated fig5_clock_mode.png")
 
-# --- PHASE 6: EFFECTOME COMPARISON ---
 def phase_6_effectome_comparison():
     log_stat("\n=== PHASE 5: LINEAR EFFECTOME COMPARISON ===")
     
